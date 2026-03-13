@@ -6,6 +6,13 @@ import {
   Link as LinkIcon, Image as ImageIcon, ExternalLink 
 } from 'lucide-react';
 
+// --- SOCIAL MEDIA LINKS (Updated) ---
+const SOCIAL_LINKS = {
+  instagram: "https://www.instagram.com/nomanaslam236", 
+  facebook: "https://www.facebook.com/noman.aslam.961509",
+  twitter: "https://twitter.com/your_handle"
+};
+
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from 'firebase/app';
 import { 
@@ -15,8 +22,7 @@ import {
   getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged 
 } from 'firebase/auth';
 
-// --- FIREBASE SETUP (VS CODE FRIENDLY) ---
-// Image se li gayi aapki real configuration yahan insert kar di gayi hai.
+// --- FIREBASE SETUP ---
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
   ? JSON.parse(__firebase_config) 
   : {
@@ -185,10 +191,8 @@ const AppProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
-  // Firebase Auth Effect
   useEffect(() => {
     const initAuth = async () => {
-      // VS Code environment mein __initial_auth_token undefined hoga, isliye if check zaruri hai
       if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
@@ -200,10 +204,8 @@ const AppProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Sync Blogs from Firestore (Global)
   useEffect(() => {
     if (!user) return;
-    
     const blogsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'blogs');
     const unsubscribe = onSnapshot(blogsCollection, 
       (snapshot) => {
@@ -211,13 +213,11 @@ const AppProvider = ({ children }) => {
           ...doc.data(),
           id: doc.id
         }));
-        
         const allBlogs = [...fetchedBlogs, ...INITIAL_BLOGS];
         setBlogs(allBlogs);
       },
       (error) => console.error("Firestore Error:", error)
     );
-    
     return () => unsubscribe();
   }, [user]);
 
@@ -263,13 +263,11 @@ const AppProvider = ({ children }) => {
 
   const addBlog = async (newBlog) => {
     if (!user) return;
-    
     const blogData = {
       ...newBlog,
       date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       createdAt: Date.now()
     };
-
     try {
       const blogsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'blogs');
       await addDoc(blogsCollection, blogData);
@@ -385,9 +383,9 @@ const Navbar = () => {
           </div>
           <div className="mt-auto border-t border-slate-100 pt-10">
             <div className="flex space-x-6">
-               <Instagram className="w-5 h-5 text-slate-400" />
-               <Facebook className="w-5 h-5 text-slate-400" />
-               <Twitter className="w-5 h-5 text-slate-400" />
+               <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer"><Instagram className="w-5 h-5 text-slate-400 hover:text-amber-600 transition-colors" /></a>
+               <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer"><Facebook className="w-5 h-5 text-slate-400 hover:text-blue-600 transition-colors" /></a>
+               <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer"><Twitter className="w-5 h-5 text-slate-400 hover:text-blue-400 transition-colors" /></a>
             </div>
           </div>
         </div>
@@ -486,9 +484,9 @@ const Footer = () => {
             Refining the art of luxury leather since 1994. Hand-stitched elegance for the modern woman.
           </p>
           <div className="flex space-x-6">
-            <Instagram className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" />
-            <Facebook className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" />
-            <Twitter className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" />
+            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer"><Instagram className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" /></a>
+            <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer"><Facebook className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" /></a>
+            <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer"><Twitter className="w-5 h-5 text-slate-500 hover:text-white cursor-pointer transition-colors" /></a>
           </div>
         </div>
         
@@ -638,7 +636,7 @@ const HomePage = () => {
 
       <section className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="group relative h-[600px] cursor-pointer overflow-hidden" onClick={() => navigateTo('shop')}>
                  <img src="https://images.unsplash.com/photo-1594223274512-ad4803739b7c?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Handbags"/>
                  <div className="absolute inset-0 bg-black/20 transition-opacity group-hover:opacity-40"></div>
@@ -663,7 +661,7 @@ const HomePage = () => {
                     <span className="text-[10px] font-bold uppercase tracking-[0.3em] border-b border-white pb-1">Shop Category</span>
                  </div>
               </div>
-           </div>
+            </div>
         </div>
       </section>
 
@@ -682,7 +680,6 @@ const HomePage = () => {
 
 const BlogPage = () => {
   const { blogs, navigateTo } = useStore();
-  
   return (
     <div className="pt-40 pb-32 px-6 max-w-7xl mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-10">
@@ -698,7 +695,6 @@ const BlogPage = () => {
           <PenTool className="w-4 h-4 mr-3" /> Share a Story
         </button>
       </div>
-
       {blogs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {blogs.map(blog => <BlogCard key={blog.id} blog={blog} />)}
@@ -716,41 +712,25 @@ const BlogPage = () => {
 const WriteBlogPage = () => {
   const { addBlog, navigateTo } = useStore();
   const fileInputRef = useRef();
-  
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    affiliateLink: '',
-    imageType: 'url', 
-    image: ''
+    title: '', description: '', affiliateLink: '', imageType: 'url', image: ''
   });
-
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, image: reader.result }));
-      };
+      reader.onloadend = () => setFormData(prev => ({ ...prev, image: reader.result }));
       reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.image) {
-      return;
-    }
-    
+    if (!formData.title || !formData.description || !formData.image) return;
     setIsPublishing(true);
-    await addBlog({
-      title: formData.title,
-      description: formData.description,
-      image: formData.image,
-      affiliateLink: formData.affiliateLink || '#'
-    });
+    await addBlog({ ...formData, affiliateLink: formData.affiliateLink || '#' });
     setIsPublishing(false);
     navigateTo('blog');
   };
@@ -760,108 +740,37 @@ const WriteBlogPage = () => {
       <button onClick={() => navigateTo('blog')} className="mb-12 flex items-center text-[10px] font-bold uppercase tracking-[0.3em] hover:text-amber-600 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Journal
       </button>
-      
       <div className="bg-white border border-slate-100 p-12 md:p-20 rounded-sm shadow-2xl">
         <div className="mb-16 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-amber-600 mb-6">Contribute</p>
           <h1 className="text-4xl font-serif italic">Share Your Fashion Story</h1>
         </div>
-        
         <form onSubmit={handleSubmit} className="space-y-12">
           <div>
             <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 block mb-4">Article Title</label>
-            <input 
-              required
-              type="text" 
-              placeholder="e.g., The Art of the Mini Bag..."
-              className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 text-2xl font-serif placeholder:italic"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            />
+            <input required type="text" placeholder="e.g., The Art of the Mini Bag..." className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 text-2xl font-serif placeholder:italic" value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} />
           </div>
-
           <div>
             <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 block mb-4">Content</label>
-            <textarea 
-              required
-              rows="8"
-              placeholder="Tell your story here..."
-              className="w-full border border-slate-100 bg-[#FDFBF7] p-8 focus:outline-none focus:border-amber-500 text-sm leading-loose font-light"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            />
+            <textarea required rows="8" placeholder="Tell your story here..." className="w-full border border-slate-100 bg-[#FDFBF7] p-8 focus:outline-none focus:border-amber-500 text-sm leading-loose font-light" value={formData.description} onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} />
           </div>
-
           <div className="space-y-6">
             <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 block">Cover Media</label>
             <div className="flex flex-wrap gap-4 mb-6">
-              <button 
-                type="button" 
-                onClick={() => setFormData(prev => ({ ...prev, imageType: 'url' }))}
-                className={`flex items-center px-6 py-3 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-sm ${formData.imageType === 'url' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500'}`}
-              >
-                <LinkIcon className="w-3 h-3 mr-3" /> Image URL
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setFormData(prev => ({ ...prev, imageType: 'file' }))}
-                className={`flex items-center px-6 py-3 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-sm ${formData.imageType === 'file' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500'}`}
-              >
-                <ImageIcon className="w-3 h-3 mr-3" /> From Gallery
-              </button>
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageType: 'url' }))} className={`flex items-center px-6 py-3 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-sm ${formData.imageType === 'url' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500'}`}> <LinkIcon className="w-3 h-3 mr-3" /> Image URL </button>
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageType: 'file' }))} className={`flex items-center px-6 py-3 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-sm ${formData.imageType === 'file' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-500'}`}> <ImageIcon className="w-3 h-3 mr-3" /> From Gallery </button>
             </div>
-
             {formData.imageType === 'url' ? (
-              <input 
-                type="url" 
-                placeholder="Paste high-quality image URL (https://...)"
-                className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 text-sm italic font-light"
-                value={formData.image}
-                onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-              />
+              <input type="url" placeholder="Paste high-quality image URL (https://...)" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 text-sm italic font-light" value={formData.image} onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))} />
             ) : (
               <div className="flex flex-col sm:flex-row items-center gap-6 p-8 border-2 border-dashed border-slate-100 bg-[#FDFBF7]">
-                <button 
-                  type="button" 
-                  onClick={() => fileInputRef.current.click()}
-                  className="px-10 py-4 border border-slate-200 bg-white text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-slate-50 transition-all"
-                >
-                  Choose File
-                </button>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  accept="image/*" 
-                  hidden 
-                  onChange={handleFileChange} 
-                />
-                {formData.image ? (
-                  <span className="text-amber-600 text-[10px] font-bold flex items-center animate-pulse"><CheckCircle className="w-4 h-4 mr-2" /> Media Ready</span>
-                ) : (
-                  <span className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">Supported formats: JPG, PNG, WEBP</span>
-                )}
+                <button type="button" onClick={() => fileInputRef.current.click()} className="px-10 py-4 border border-slate-200 bg-white text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-slate-50 transition-all"> Choose File </button>
+                <input type="file" ref={fileInputRef} accept="image/*" hidden onChange={handleFileChange} />
+                {formData.image ? <span className="text-amber-600 text-[10px] font-bold flex items-center animate-pulse"><CheckCircle className="w-4 h-4 mr-2" /> Media Ready</span> : <span className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">Supported formats: JPG, PNG, WEBP</span>}
               </div>
             )}
           </div>
-
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 block mb-4">Affiliate Product Link (Optional)</label>
-            <input 
-              type="url" 
-              placeholder="Add shop link for featured products..."
-              className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 text-sm italic font-light"
-              value={formData.affiliateLink}
-              onChange={(e) => setFormData(prev => ({ ...prev, affiliateLink: e.target.value }))}
-            />
-          </div>
-
-          <button 
-            type="submit"
-            disabled={isPublishing}
-            className="w-full bg-slate-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-amber-600 transition-all duration-500 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isPublishing ? 'Publishing Globally...' : 'Publish Article'}
-          </button>
+          <button type="submit" disabled={isPublishing} className="w-full bg-slate-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-amber-600 transition-all duration-500 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"> {isPublishing ? 'Publishing Globally...' : 'Publish Article'} </button>
         </form>
       </div>
     </div>
@@ -870,7 +779,6 @@ const WriteBlogPage = () => {
 
 const ShopPage = () => {
   const { categoryFilter, setCategoryFilter, searchQuery, setSearchQuery, navigateTo } = useStore();
-  
   const filteredProducts = PRODUCTS.filter(p => {
     const matchesCat = categoryFilter === 'All' || p.category === categoryFilter;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -884,35 +792,19 @@ const ShopPage = () => {
         <h1 className="text-6xl font-serif leading-tight">Maison <span className="italic">Boutique</span></h1>
         <p className="text-slate-400 text-sm tracking-[0.2em] uppercase font-light mt-4">Exploring the pinnacle of accessory design</p>
       </div>
-
       <div className="flex flex-col lg:flex-row gap-20">
         <aside className="w-full lg:w-72 space-y-16">
           <div className="bg-[#FDFBF7] p-10 rounded-sm border border-slate-100">
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-8 flex items-center text-slate-900">
-              <Search className="w-4 h-4 mr-3 text-amber-600" /> Search Maison
-            </h4>
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-8 flex items-center text-slate-900"> <Search className="w-4 h-4 mr-3 text-amber-600" /> Search Maison </h4>
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Product name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent border-b border-slate-200 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors font-light italic"
-              />
+              <input type="text" placeholder="Product name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-transparent border-b border-slate-200 py-3 text-sm focus:outline-none focus:border-amber-500 transition-colors font-light italic" />
             </div>
           </div>
-
           <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-10 flex items-center text-slate-900">
-              <Filter className="w-4 h-4 mr-3 text-amber-600" /> Categories
-            </h4>
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-10 flex items-center text-slate-900"> <Filter className="w-4 h-4 mr-3 text-amber-600" /> Categories </h4>
             <div className="space-y-5">
               {CATEGORIES.map(cat => (
-                <button 
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`group flex items-center text-xs tracking-[0.2em] uppercase transition-all duration-300 ${categoryFilter === cat ? 'text-amber-600 font-bold ml-2' : 'text-slate-500 hover:text-slate-900 hover:ml-2'}`}
-                >
+                <button key={cat} onClick={() => setCategoryFilter(cat)} className={`group flex items-center text-xs tracking-[0.2em] uppercase transition-all duration-300 ${categoryFilter === cat ? 'text-amber-600 font-bold ml-2' : 'text-slate-500 hover:text-slate-900 hover:ml-2'}`}>
                   <span className={`w-1 h-1 bg-amber-600 rounded-full mr-3 transition-transform ${categoryFilter === cat ? 'scale-150' : 'scale-0 group-hover:scale-100'}`}></span>
                   {cat}
                 </button>
@@ -920,7 +812,6 @@ const ShopPage = () => {
             </div>
           </div>
         </aside>
-
         <main className="flex-grow">
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-12">
@@ -941,53 +832,31 @@ const ShopPage = () => {
 const ProductPage = () => {
   const { selectedProductId, addToCart, navigateTo, toggleWishlist, wishlist } = useStore();
   const [qty, setQty] = useState(1);
-  
   const product = PRODUCTS.find(p => p.id === selectedProductId);
   const isWishlisted = wishlist.find(item => item.id === product?.id);
-
   if (!product) return <div className="pt-40 text-center font-serif italic text-2xl">Searching Maison Archives...</div>;
-
   return (
     <div className="pt-40 pb-32 max-w-7xl mx-auto px-6 animate-in fade-in duration-700">
-      <button onClick={() => navigateTo('shop')} className="mb-16 flex items-center text-[10px] font-bold uppercase tracking-[0.3em] hover:text-amber-600 transition-all">
-        <ArrowLeft className="w-4 h-4 mr-3" /> Back to Boutique
-      </button>
-
+      <button onClick={() => navigateTo('shop')} className="mb-16 flex items-center text-[10px] font-bold uppercase tracking-[0.3em] hover:text-amber-600 transition-all"> <ArrowLeft className="w-4 h-4 mr-3" /> Back to Boutique </button>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
-        <div className="space-y-8">
-          <div className="aspect-[4/5] bg-[#FDFBF7] overflow-hidden rounded-sm shadow-2xl group">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
-          </div>
+        <div className="aspect-[4/5] bg-[#FDFBF7] overflow-hidden rounded-sm shadow-2xl group">
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
         </div>
-
         <div className="flex flex-col py-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-amber-600 mb-6">{product.category}</p>
           <h1 className="text-5xl font-serif mb-8 leading-tight">{product.name}</h1>
           <p className="text-3xl font-light text-slate-900 mb-10 tracking-tighter">${product.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
           <div className="w-20 h-[1px] bg-amber-600 mb-10"></div>
           <p className="text-slate-500 leading-loose mb-12 text-lg font-light">{product.description}</p>
-
           <div className="mb-12 flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-8">
             <div className="flex items-center border border-slate-200 bg-[#FDFBF7]">
               <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-6 py-5 hover:bg-slate-50 transition-colors"><Minus className="w-3 h-3" /></button>
               <span className="px-10 text-sm font-bold">{qty}</span>
               <button onClick={() => setQty(qty + 1)} className="px-6 py-5 hover:bg-slate-50 transition-colors"><Plus className="w-3 h-3" /></button>
             </div>
-            <button 
-              onClick={() => addToCart(product, qty)}
-              className="w-full flex-grow bg-slate-900 text-white py-6 px-12 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-amber-600 transition-all duration-500 shadow-2xl"
-            >
-              Add to Bag
-            </button>
+            <button onClick={() => addToCart(product, qty)} className="w-full flex-grow bg-slate-900 text-white py-6 px-12 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-amber-600 transition-all duration-500 shadow-2xl"> Add to Bag </button>
           </div>
-          
-          <button 
-            onClick={() => toggleWishlist(product)}
-            className="flex items-center justify-center space-x-3 text-[10px] font-bold uppercase tracking-[0.3em] py-5 border border-slate-200 hover:bg-slate-50 transition-all"
-          >
-            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-amber-600 text-amber-600 animate-pulse' : ''}`} />
-            <span>{isWishlisted ? 'Saved in Wishlist' : 'Add to Wishlist'}</span>
-          </button>
+          <button onClick={() => toggleWishlist(product)} className="flex items-center justify-center space-x-3 text-[10px] font-bold uppercase tracking-[0.3em] py-5 border border-slate-200 hover:bg-slate-50 transition-all"> <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-amber-600 text-amber-600 animate-pulse' : ''}`} /> <span>{isWishlisted ? 'Saved in Wishlist' : 'Add to Wishlist'}</span> </button>
         </div>
       </div>
     </div>
@@ -996,7 +865,6 @@ const ProductPage = () => {
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, cartTotal, navigateTo } = useStore();
-
   return (
     <div className="pt-40 pb-32 max-w-7xl mx-auto px-6 animate-in fade-in duration-500">
       <h1 className="text-5xl font-serif mb-20 italic">Shopping Bag</h1>
@@ -1012,9 +880,7 @@ const CartPage = () => {
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-amber-600 mb-2">{item.category}</p>
                     <h4 className="font-serif text-2xl leading-tight mb-4 group-hover:text-amber-600 transition-colors cursor-pointer" onClick={() => navigateTo('product', item.id)}>{item.name}</h4>
-                    <button onClick={() => removeFromCart(item.id)} className="text-[9px] font-bold uppercase tracking-[0.3em] text-red-400 hover:text-red-600 transition-colors flex items-center">
-                       <Trash2 className="w-3 h-3 mr-2" /> Remove
-                    </button>
+                    <button onClick={() => removeFromCart(item.id)} className="text-[9px] font-bold uppercase tracking-[0.3em] text-red-400 hover:text-red-600 transition-colors flex items-center"> <Trash2 className="w-3 h-3 mr-2" /> Remove </button>
                   </div>
                 </div>
                 <div className="col-span-4 md:col-span-2 text-center text-sm font-medium tracking-tighter">${item.price.toFixed(2)}</div>
@@ -1033,19 +899,10 @@ const CartPage = () => {
             <div className="bg-[#FDFBF7] p-12 rounded-sm border border-slate-100 sticky top-40 shadow-xl">
               <h3 className="text-xl font-serif mb-10 border-b border-slate-200 pb-6">Bag Summary</h3>
               <div className="space-y-6 mb-12">
-                 <div className="flex justify-between text-xs tracking-widest uppercase text-slate-500 font-bold">
-                    <span>Subtotal</span>
-                    <span className="text-slate-900">${cartTotal.toFixed(2)}</span>
-                 </div>
-                 <div className="flex justify-between text-xs tracking-widest uppercase text-slate-500 font-bold">
-                    <span>Shipping</span>
-                    <span className="text-slate-900">Complimentary</span>
-                 </div>
+                 <div className="flex justify-between text-xs tracking-widest uppercase text-slate-500 font-bold"> <span>Subtotal</span> <span>${cartTotal.toFixed(2)}</span> </div>
+                 <div className="flex justify-between text-xs tracking-widest uppercase text-slate-500 font-bold"> <span>Shipping</span> <span>Complimentary</span> </div>
               </div>
-              <div className="flex justify-between font-bold text-2xl mb-12 border-t border-slate-200 pt-8 tracking-tighter">
-                <span className="font-serif italic text-slate-900">Total</span>
-                <span className="text-amber-600">${cartTotal.toFixed(2)}</span>
-              </div>
+              <div className="flex justify-between font-bold text-2xl mb-12 border-t border-slate-200 pt-8 tracking-tighter"> <span className="font-serif italic text-slate-900">Total</span> <span className="text-amber-600">${cartTotal.toFixed(2)}</span> </div>
               <button onClick={() => navigateTo('checkout')} className="w-full bg-slate-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-amber-600 transition-all duration-500 shadow-2xl">Proceed to Checkout</button>
             </div>
           </div>
@@ -1064,93 +921,29 @@ const CartPage = () => {
 const CheckoutPage = () => {
   const { cartTotal, navigateTo, clearCart } = useStore();
   const [completed, setCompleted] = useState(false);
-
-  const handlePlaceOrder = (e) => {
-    e.preventDefault();
-    setCompleted(true);
-    clearCart();
-  };
-
-  if (completed) {
-    return (
-      <div className="pt-40 pb-40 flex flex-col items-center text-center px-6 animate-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-8">
-          <CheckCircle className="w-10 h-10" />
-        </div>
-        <h1 className="text-4xl font-serif mb-4 italic">Your Order is Confirmed</h1>
-        <p className="text-slate-500 text-lg italic max-w-md mx-auto mb-12">
-          Thank you for choosing Lumière Luxe. Your artisan-crafted selection is being prepared for dispatch.
-        </p>
-        <button 
-          onClick={() => navigateTo('home')}
-          className="bg-slate-900 text-white px-12 py-5 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-amber-600 transition-all"
-        >
-          Return to Maison
-        </button>
-      </div>
-    );
-  }
-
+  const handlePlaceOrder = (e) => { e.preventDefault(); setCompleted(true); clearCart(); };
+  if (completed) return (
+    <div className="pt-40 pb-40 flex flex-col items-center text-center px-6 animate-in zoom-in duration-500">
+      <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-8"> <CheckCircle className="w-10 h-10" /> </div>
+      <h1 className="text-4xl font-serif mb-4 italic">Your Order is Confirmed</h1>
+      <p className="text-slate-500 text-lg italic max-w-md mx-auto mb-12"> Thank you for choosing Lumière Luxe. Your artisan-crafted selection is being prepared for dispatch. </p>
+      <button onClick={() => navigateTo('home')} className="bg-slate-900 text-white px-12 py-5 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-amber-600 transition-all"> Return to Maison </button>
+    </div>
+  );
   return (
     <div className="pt-40 pb-32 max-w-7xl mx-auto px-6 animate-in fade-in duration-500">
       <h1 className="text-5xl font-serif mb-20 italic">Finalizing Order</h1>
-      
       <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-20">
         <div className="lg:col-span-8 space-y-16">
-          <section>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] mb-10 flex items-center text-amber-600">
-              <span className="w-8 h-8 rounded-full border border-amber-600 flex items-center justify-center text-[10px] mr-4">01</span>
-              Delivery Details
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <input required type="text" placeholder="First Name" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" />
-              <input required type="text" placeholder="Last Name" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" />
-              <div className="md:col-span-2">
-                <input required type="text" placeholder="Street Address" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" />
-              </div>
-              <input required type="text" placeholder="City" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" />
-              <input required type="text" placeholder="Postcode" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" />
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] mb-10 flex items-center text-amber-600">
-              <span className="w-8 h-8 rounded-full border border-amber-600 flex items-center justify-center text-[10px] mr-4">02</span>
-              Payment Method
-            </h3>
-            <div className="space-y-10">
-              <input required type="text" placeholder="Card Number" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light tracking-widest" />
-              <div className="grid grid-cols-2 gap-10">
-                <input required type="text" placeholder="MM / YY" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light" />
-                <input required type="text" placeholder="CVV" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light" />
-              </div>
-            </div>
-          </section>
+          <section> <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] mb-10 flex items-center text-amber-600"> <span className="w-8 h-8 rounded-full border border-amber-600 flex items-center justify-center text-[10px] mr-4">01</span> Delivery Details </h3> <div className="grid grid-cols-1 md:grid-cols-2 gap-10"> <input required type="text" placeholder="First Name" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" /> <input required type="text" placeholder="Last Name" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" /> <div className="md:col-span-2"> <input required type="text" placeholder="Street Address" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" /> </div> <input required type="text" placeholder="City" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" /> <input required type="text" placeholder="Postcode" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light italic" /> </div> </section>
+          <section> <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] mb-10 flex items-center text-amber-600"> <span className="w-8 h-8 rounded-full border border-amber-600 flex items-center justify-center text-[10px] mr-4">02</span> Payment Method </h3> <div className="space-y-10"> <input required type="text" placeholder="Card Number" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light tracking-widest" /> <div className="grid grid-cols-2 gap-10"> <input required type="text" placeholder="MM / YY" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light" /> <input required type="text" placeholder="CVV" className="w-full border-b border-slate-200 py-4 focus:outline-none focus:border-amber-500 font-light" /> </div> </div> </section>
         </div>
-
         <div className="lg:col-span-4">
           <div className="bg-[#FDFBF7] p-12 rounded-sm border border-slate-100 shadow-xl sticky top-40">
             <h3 className="text-xl font-serif mb-8 text-slate-900">Summary</h3>
-            <div className="space-y-5 mb-10 text-slate-500">
-              <div className="flex justify-between text-[10px] tracking-widest uppercase">
-                <span>Merchandise</span>
-                <span className="text-slate-900">${cartTotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[10px] tracking-widest uppercase">
-                <span>Secure Shipping</span>
-                <span className="text-slate-900">$25.00</span>
-              </div>
-            </div>
-            <div className="border-t border-slate-200 pt-8 flex justify-between font-bold text-2xl mb-12 tracking-tighter">
-              <span className="font-serif italic text-slate-900">Total</span>
-              <span className="text-amber-600">${(cartTotal + 25).toFixed(2)}</span>
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-slate-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-amber-600 transition-all duration-500 shadow-2xl"
-            >
-              Place Order
-            </button>
+            <div className="space-y-5 mb-10 text-slate-500"> <div className="flex justify-between text-[10px] tracking-widest uppercase"> <span>Merchandise</span> <span>${cartTotal.toFixed(2)}</span> </div> <div className="flex justify-between text-[10px] tracking-widest uppercase"> <span>Secure Shipping</span> <span>$25.00</span> </div> </div>
+            <div className="border-t border-slate-200 pt-8 flex justify-between font-bold text-2xl mb-12 tracking-tighter"> <span className="font-serif italic text-slate-900">Total</span> <span className="text-amber-600">${(cartTotal + 25).toFixed(2)}</span> </div>
+            <button type="submit" className="w-full bg-slate-900 text-white py-6 text-[10px] font-bold uppercase tracking-[0.5em] hover:bg-amber-600 transition-all duration-500 shadow-2xl"> Place Order </button>
           </div>
         </div>
       </form>
@@ -1169,10 +962,7 @@ const WishlistPage = () => {
           {wishlist.map(product => <ProductCard key={product.id} product={product} />)}
         </div>
       ) : (
-        <div className="py-40 bg-[#FDFBF7] rounded-sm border border-dashed border-slate-200">
-           <Heart className="w-16 h-16 text-slate-200 mx-auto mb-10" />
-           <p className="text-slate-400 italic text-xl font-serif">You haven't added any pieces to your favorites yet.</p>
-        </div>
+        <div className="py-40 bg-[#FDFBF7] rounded-sm border border-dashed border-slate-200"> <Heart className="w-16 h-16 text-slate-200 mx-auto mb-10" /> <p className="text-slate-400 italic text-xl font-serif">You haven't added any pieces to your favorites yet.</p> </div>
       )}
     </div>
   );
@@ -1192,27 +982,10 @@ const AboutPage = () => (
            </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-20 text-left items-center pt-10">
-           <div>
-              <h2 className="text-3xl font-serif mb-8 leading-snug">From the Heart of Florence, to the World.</h2>
-              <p className="text-slate-500 text-lg font-light leading-loose">
-                Lumière Luxe stands at the intersection of artisanal tradition and avant-garde luxury. Every hide is inspected by master craftsmen, and every stitch is applied with the weight of our history.
-              </p>
-           </div>
+           <div> <h2 className="text-3xl font-serif mb-8 leading-snug">From the Heart of Florence, to the World.</h2> <p className="text-slate-500 text-lg font-light leading-loose"> Lumière Luxe stands at the intersection of artisanal tradition and avant-garde luxury. Every hide is inspected by master craftsmen, and every stitch is applied with the weight of our history. </p> </div>
            <div className="space-y-12">
-              <div className="flex items-start space-x-8">
-                 <span className="text-5xl font-serif text-amber-600 opacity-30">01</span>
-                 <div>
-                    <h4 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-3">Material Integrity</h4>
-                    <p className="text-slate-500 text-sm font-light leading-relaxed">We source only A-grade Italian leathers from ethical, certified tanneries.</p>
-                 </div>
-              </div>
-              <div className="flex items-start space-x-8">
-                 <span className="text-5xl font-serif text-amber-600 opacity-30">02</span>
-                 <div>
-                    <h4 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-3">Master Artistry</h4>
-                    <p className="text-slate-500 text-sm font-light leading-relaxed">Each piece takes approximately 48 hours of focused hand-construction.</p>
-                 </div>
-              </div>
+              <div className="flex items-start space-x-8"> <span className="text-5xl font-serif text-amber-600 opacity-30">01</span> <div> <h4 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-3">Material Integrity</h4> <p className="text-slate-500 text-sm font-light leading-relaxed">We source only A-grade Italian leathers from ethical, certified tanneries.</p> </div> </div>
+              <div className="flex items-start space-x-8"> <span className="text-5xl font-serif text-amber-600 opacity-30">02</span> <div> <h4 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-3">Master Artistry</h4> <p className="text-slate-500 text-sm font-light leading-relaxed">Each piece takes approximately 48 hours of focused hand-construction.</p> </div> </div>
            </div>
         </div>
       </div>
@@ -1221,10 +994,8 @@ const AboutPage = () => (
 );
 
 // --- MAIN APP COMPONENT ---
-
 const App = () => {
   const { currentPage } = useStore();
-
   const renderPage = () => {
     switch (currentPage) {
       case 'home': return <HomePage />;
@@ -1239,45 +1010,22 @@ const App = () => {
       default: return <HomePage />;
     }
   };
-
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-amber-100 selection:text-amber-900">
       <Navbar />
-      <main>
-        {renderPage()}
-      </main>
+      <main> {renderPage()} </main>
       <Footer />
-      
       <style>{`
-        @keyframes scroll-line {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(200%); }
-        }
-        .animate-scroll-line {
-          animation: scroll-line 2s infinite ease-in-out;
-        }
-        @keyframes slow-zoom {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.1); }
-        }
-        .animate-slow-zoom {
-          animation: slow-zoom 20s infinite alternate ease-in-out;
-        }
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;  
-          overflow: hidden;
-        }
+        @keyframes scroll-line { 0% { transform: translateY(-100%); } 100% { transform: translateY(200%); } }
+        .animate-scroll-line { animation: scroll-line 2s infinite ease-in-out; }
+        @keyframes slow-zoom { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+        .animate-slow-zoom { animation: slow-zoom 20s infinite alternate ease-in-out; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
     </div>
   );
 };
 
 export default function AppWrapper() {
-  return (
-    <AppProvider>
-      <App />
-    </AppProvider>
-  );
+  return ( <AppProvider> <App /> </AppProvider> );
 }
